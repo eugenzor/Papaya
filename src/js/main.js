@@ -211,6 +211,10 @@ papaya.Container.addImage = function (index, imageRef, imageParams) {
 papaya.Container.findParameters = function (containerHTML) {
     var viewerHTML, paramsName, loadedParams = null;
 
+    if (papaya.params) {
+        return papaya.params;
+    }
+
     paramsName = containerHTML.data("params");
 
     if (!paramsName) {
@@ -1546,11 +1550,11 @@ papaya.Container.prototype.canCurrentOverlayModulate = function () {
 
 /*** Window Events ***/
 
-window.addEventListener('resize', papaya.Container.resizePapaya, false);
-window.addEventListener("orientationchange", papaya.Container.reorientPapaya, false);
-window.addEventListener("load", papaya.Container.startPapaya, false);
-window.addEventListener('message', function (msg) {
-    if (msg.data === PAPAYA_MANGO_INSTALLED) {
-        papaya.mangoinstalled = true;
-    }
-}, false);
+// window.addEventListener('resize', papaya.Container.resizePapaya, false);
+// window.addEventListener("orientationchange", papaya.Container.reorientPapaya, false);
+// window.addEventListener("load", papaya.Container.startPapaya, false);
+// window.addEventListener('message', function (msg) {
+//     if (msg.data === PAPAYA_MANGO_INSTALLED) {
+//         papaya.mangoinstalled = true;
+//     }
+// }, false);

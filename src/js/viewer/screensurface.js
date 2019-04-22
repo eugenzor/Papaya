@@ -560,7 +560,7 @@ papaya.viewer.ScreenSurface.prototype.unpackFloatFromVec4i = function (val) {
 papaya.viewer.ScreenSurface.prototype.hasTranslucentSurfaces = function () {
     var ctr;
     for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
-        if (this.surfaces[ctr].alpha < 1) {
+        if (!this.surfaces[ctr].hidden && this.surfaces[ctr].alpha < 1) {
             return true;
         }
     }
@@ -616,7 +616,9 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
     gl.enable(gl.DEPTH_TEST);
 
     for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
-        this.renderSurface(gl, ctr, this.surfaces[ctr].alpha < 1, true, false);
+        if (!this.surfaces[ctr].hidden) {
+          this.renderSurface(gl, ctr, this.surfaces[ctr].alpha < 1, true, false);
+        }
     }
 
     gl.uniform1i(this.shaderProgram.hasSolidColor, 0);
@@ -708,7 +710,7 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
         gl.enable(gl.DEPTH_TEST);
 
         for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
-            if (hasTranslucent) {
+            if (!this.surfaces[ctr].hidden && hasTranslucent) {
                 this.renderSurface(gl, ctr, this.surfaces[ctr].alpha < 1, false, true);
             }
         }

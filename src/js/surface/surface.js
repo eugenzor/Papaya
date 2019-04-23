@@ -33,6 +33,7 @@ papaya.surface.Surface = papaya.surface.Surface || function (progressMeter, para
     this.nextSurface = null;
     this.volume = null;
     this.alpha = 1;
+    this.hidden = false;
 };
 
 /*** Static Pseudo-constants ***/

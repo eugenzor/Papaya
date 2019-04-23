@@ -26,6 +26,7 @@ papaya.utilities.PlatformUtils.ios = bowser.ios;
 papaya.utilities.PlatformUtils.mobile = bowser.mobile;
 papaya.utilities.PlatformUtils.lastScrollEventTimestamp = 0;
 papaya.utilities.PlatformUtils.smallScreen = window.matchMedia && window.matchMedia("only screen and (max-width: 760px)").matches;
+papaya.utilities.PlatformUtils.webGLSupport = null;
 
 /*** Static Methods ***/
 
@@ -73,6 +74,10 @@ papaya.utilities.PlatformUtils.checkForBrowserCompatibility = function () {
 
 
 papaya.utilities.PlatformUtils.isWebGLSupported = function () {
+    if (papaya.utilities.PlatformUtils.webGLSupport !== null) {
+        return papaya.utilities.PlatformUtils.webGLSupport !== null;
+    }
+
     var canvas;
     var ctx;
     var ext;
@@ -82,10 +87,12 @@ papaya.utilities.PlatformUtils.isWebGLSupported = function () {
         ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         ext = ctx.getExtension('OES_element_index_uint');
         if (!ext) {
+            papaya.utilities.PlatformUtils.webGLSupport = false;
             return false;
         }
     } catch (e) {
         console.log("There was a problem detecting WebGL! " + e);
+        papaya.utilities.PlatformUtils.webGLSupport = false;
         return false;
     }
 
@@ -93,6 +100,7 @@ papaya.utilities.PlatformUtils.isWebGLSupported = function () {
     ctx = null;
     ext = null;
 
+    papaya.utilities.PlatformUtils.webGLSupport = true;
     return true;
 };
 

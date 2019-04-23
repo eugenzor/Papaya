@@ -143,6 +143,10 @@ papaya.Container.resetViewer = function (index, params) {
             params.encodedSurfaces = params.loadedEncodedSurfaces;
         }
 
+        if (params.loadedBinarySurfaces) {
+            params.binarySurfaces = params.loadedBinarySurfaces;
+        }
+
         if (params.loadedFiles) {
             params.files = params.loadedFiles;
         }
@@ -1182,6 +1186,8 @@ papaya.Container.prototype.hasSurfaceToLoad = function () {
         return (this.loadingSurfaceIndex < this.params.surfaces.length);
     } else if (this.params.encodedSurfaces) {
         return (this.loadingSurfaceIndex < this.params.encodedSurfaces.length);
+    } else if (this.params.binarySurfaces) {
+        return (this.loadingSurfaceIndex < this.params.binarySurfaces.length);
     }
 
     return false;
@@ -1217,6 +1223,22 @@ papaya.Container.prototype.loadNextSurface = function () {
         } else {
             this.params.loadedEncodedSurfaces = this.params.encodedSurfaces;
             this.params.encodedSurfaces = [];
+        }
+    } else if (this.params.binarySurfaces) {
+        if (this.loadingSurfaceIndex < this.params.binarySurfaces.length) {
+            loadingNext = true;
+            imageRefs = this.params.binarySurfaces[this.loadingSurfaceIndex];
+
+            if (!(imageRefs instanceof Array)) {
+                imageRefs = [];
+                imageRefs[0] = this.params.binarySurfaces[this.loadingSurfaceIndex];
+            }
+
+            this.viewer.loadSurface(imageRefs, false, false);
+            this.loadingSurfaceIndex += 1;
+        } else {
+            this.params.loadedBinarySurfaces = this.params.binarySurfaces;
+            this.params.binarySurfaces = [];
         }
     }
 
@@ -1307,7 +1329,9 @@ papaya.Container.prototype.readyForDnD = function () {
         ((this.params.encodedImages === undefined) ||
         (this.loadingImageIndex >= this.params.encodedImages.length)) &&
         ((this.params.encodedSurfaces === undefined) ||
-        (this.loadingSurfaceIndex >= this.params.encodedSurfaces.length));
+        (this.loadingSurfaceIndex >= this.params.encodedSurfaces.length)) &&
+        ((this.params.binarySurfaces === undefined) ||
+        (this.loadingSurfaceIndex >= this.params.binarySurfaces.length));
 };
 
 

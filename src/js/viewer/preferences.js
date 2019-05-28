@@ -22,6 +22,7 @@ papaya.viewer.Preferences = papaya.viewer.Preferences || function () {
     this.surfaceBackgroundColor = papaya.viewer.Preferences.DEFAULT_SURFACE_BACKGROUND_COLOR;
     this.showSurfacePlanes = papaya.viewer.Preferences.DEFAULT_SHOW_SURFACE_PLANES;
     this.showSurfaceCrosshairs = papaya.viewer.Preferences.DEFAULT_SHOW_SURFACE_CROSSHAIRS;
+    this.showCoordinates = papaya.viewer.Preferences.DEFAULT_SHOW_COORDINATES;
 };
 
 
@@ -40,6 +41,7 @@ papaya.viewer.Preferences.DEFAULT_RADIOLOGICAL = "No";
 papaya.viewer.Preferences.DEFAULT_SHOW_RULER = "No";
 papaya.viewer.Preferences.DEFAULT_SURFACE_BACKGROUND_COLOR = "Gray";
 papaya.viewer.Preferences.DEFAULT_SHOW_SURFACE_PLANES = "Yes";
+papaya.viewer.Preferences.DEFAULT_SHOW_COORDINATES = "Yes";
 
 
 /*** Prototype Methods ***/

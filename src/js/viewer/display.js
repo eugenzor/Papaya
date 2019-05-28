@@ -122,43 +122,44 @@ papaya.viewer.Display.prototype.drawDisplay = function (xLoc, yLoc, zLoc) {
         this.context.fillStyle = "#000000";
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        if (this.container.preferences.showCoordinates == "Yes") {
+            // coordinate labels
+            this.context.fillStyle = papaya.viewer.Display.FONT_COLOR_COORDINATE_LABEL;
+            this.context.font = papaya.viewer.Display.FONT_SIZE_COORDINATE_LABEL + "px " +
+                papaya.viewer.Display.FONT_TYPE_COORDINATE_LABEL;
 
-        // coordinate labels
-        this.context.fillStyle = papaya.viewer.Display.FONT_COLOR_COORDINATE_LABEL;
-        this.context.font = papaya.viewer.Display.FONT_SIZE_COORDINATE_LABEL + "px " +
-            papaya.viewer.Display.FONT_TYPE_COORDINATE_LABEL;
+            locY = papaya.viewer.Display.FONT_SIZE_COORDINATE_LABEL + papaya.viewer.Display.PADDING * 0.75;
 
-        locY = papaya.viewer.Display.FONT_SIZE_COORDINATE_LABEL + papaya.viewer.Display.PADDING * 0.75;
-
-        this.context.fillText("x", 1.5 * papaya.viewer.Display.PADDING, locY);
-        this.context.fillText("y", 1.5 * papaya.viewer.Display.PADDING + coordinateItemWidth, locY);
-        this.context.fillText("z", 1.5 * papaya.viewer.Display.PADDING + (2 * coordinateItemWidth), locY);
+            this.context.fillText("x", 1.5 * papaya.viewer.Display.PADDING, locY);
+            this.context.fillText("y", 1.5 * papaya.viewer.Display.PADDING + coordinateItemWidth, locY);
+            this.context.fillText("z", 1.5 * papaya.viewer.Display.PADDING + (2 * coordinateItemWidth), locY);
 
 
-        // coordinate values
-        locY += papaya.viewer.Display.FONT_SIZE_COORDINATE_VALUE + papaya.viewer.Display.PADDING / 2;
+            // coordinate values
+            locY += papaya.viewer.Display.FONT_SIZE_COORDINATE_VALUE + papaya.viewer.Display.PADDING / 2;
 
-        this.context.fillStyle = papaya.viewer.Display.FONT_COLOR_COORDINATE_VALUE;
-        this.context.font = (papaya.viewer.Display.FONT_SIZE_COORDINATE_VALUE - (smallViewer ? 2 : 0)) + "px " +
-            papaya.viewer.Display.FONT_TYPE_COORDINATE_VALUE;
+            this.context.fillStyle = papaya.viewer.Display.FONT_COLOR_COORDINATE_VALUE;
+            this.context.font = (papaya.viewer.Display.FONT_SIZE_COORDINATE_VALUE - (smallViewer ? 2 : 0)) + "px " +
+                papaya.viewer.Display.FONT_TYPE_COORDINATE_VALUE;
 
-        if (this.viewer.worldSpace) {
-            viewerOrigin = this.viewer.screenVolumes[0].volume.header.origin;  // base image origin
-            viewerVoxelDims = this.viewer.screenVolumes[0].volume.header.voxelDimensions;
-            precision = Math.min(papaya.viewer.Display.PRECISION_COORDINATE_MAX,
-                (Math.round(papaya.viewer.Display.PRECISION_COORDINATE_VALUE * sizeRatio)));
-            this.context.fillText(parseFloat(((xLoc - viewerOrigin.x) * viewerVoxelDims.xSize).toString().substr(0,
-                precision)), 1.5 * papaya.viewer.Display.PADDING, locY);
-            this.context.fillText(parseFloat(((viewerOrigin.y - yLoc) * viewerVoxelDims.ySize).toString().substr(0,
-                precision)), 1.5 * papaya.viewer.Display.PADDING + coordinateItemWidth, locY);
-            this.context.fillText(parseFloat(((viewerOrigin.z - zLoc) * viewerVoxelDims.zSize).toString().substr(0,
-                precision)), 1.5 * papaya.viewer.Display.PADDING + (2 * coordinateItemWidth), locY);
-        } else {
-            this.context.fillText(Math.round(xLoc).toString(), 1.5 * papaya.viewer.Display.PADDING, locY);
-            this.context.fillText(Math.round(yLoc).toString(), 1.5 * papaya.viewer.Display.PADDING +
-                coordinateItemWidth, locY);
-            this.context.fillText(Math.round(zLoc).toString(), 1.5 * papaya.viewer.Display.PADDING +
-                (2 * coordinateItemWidth), locY);
+            if (this.viewer.worldSpace) {
+                viewerOrigin = this.viewer.screenVolumes[0].volume.header.origin;  // base image origin
+                viewerVoxelDims = this.viewer.screenVolumes[0].volume.header.voxelDimensions;
+                precision = Math.min(papaya.viewer.Display.PRECISION_COORDINATE_MAX,
+                    (Math.round(papaya.viewer.Display.PRECISION_COORDINATE_VALUE * sizeRatio)));
+                this.context.fillText(parseFloat(((xLoc - viewerOrigin.x) * viewerVoxelDims.xSize).toString().substr(0,
+                    precision)), 1.5 * papaya.viewer.Display.PADDING, locY);
+                this.context.fillText(parseFloat(((viewerOrigin.y - yLoc) * viewerVoxelDims.ySize).toString().substr(0,
+                    precision)), 1.5 * papaya.viewer.Display.PADDING + coordinateItemWidth, locY);
+                this.context.fillText(parseFloat(((viewerOrigin.z - zLoc) * viewerVoxelDims.zSize).toString().substr(0,
+                    precision)), 1.5 * papaya.viewer.Display.PADDING + (2 * coordinateItemWidth), locY);
+            } else {
+                this.context.fillText(Math.round(xLoc).toString(), 1.5 * papaya.viewer.Display.PADDING, locY);
+                this.context.fillText(Math.round(yLoc).toString(), 1.5 * papaya.viewer.Display.PADDING +
+                    coordinateItemWidth, locY);
+                this.context.fillText(Math.round(zLoc).toString(), 1.5 * papaya.viewer.Display.PADDING +
+                    (2 * coordinateItemWidth), locY);
+            }
         }
 
 

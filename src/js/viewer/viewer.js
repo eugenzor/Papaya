@@ -2800,6 +2800,10 @@ papaya.viewer.Viewer.prototype.processParams = function (params) {
         this.ignoreSync = params.ignoreSync;
     }
 
+    if (params.showCoordinates !== undefined) {
+        this.container.preferences.showCoordinates = (params.showCoordinates ? "Yes" : "No");
+    }
+
     if (!this.container.isDesktopMode()) {
         if (params.showOrientation !== undefined) {
             this.container.preferences.showOrientation = (params.showOrientation ? "Yes" : "No");

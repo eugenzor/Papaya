@@ -91,6 +91,14 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.listenerTouchMove = papaya.utilities.ObjectUtils.bind(this, this.touchMoveEvent);
     this.listenerTouchStart = papaya.utilities.ObjectUtils.bind(this, this.touchStartEvent);
     this.listenerTouchEnd = papaya.utilities.ObjectUtils.bind(this, this.touchEndEvent);
+
+    this.customMouseMoveEvent = null;
+    this.customMouseDownEvent = null;
+    this.customMouseOutEvent = null;
+    this.customMouseLeaveEvent = null;
+    this.customMouseUpEvent = null;
+    this.customMouseDoubleClickEvent = null;
+
     this.initialCoordinate = null;
     this.listenerScroll = papaya.utilities.ObjectUtils.bind(this, this.scrolled);
     this.longTouchTimer = null;
@@ -1907,6 +1915,10 @@ papaya.viewer.Viewer.prototype.mouseDownEvent = function (me) {
 
     me.preventDefault();
 
+    if (this.customMouseDownEvent && this.customMouseDownEvent(this, me)) {
+        return;
+    }
+
     if (this.showingContextMenu) {
         this.container.toolbar.closeAllMenus();
         me.handled = true;
@@ -2026,6 +2038,10 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
     me.preventDefault();
 
+    if (this.customMouseUpEvent && this.customMouseUpEvent(this, me)) {
+        return;
+    }
+
     if (this.showingContextMenu) {
         this.showingContextMenu = false;
         me.handled = true;
@@ -2137,6 +2153,10 @@ papaya.viewer.Viewer.prototype.findClickedSlice = function (viewer, xLoc, yLoc) 
 papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
     me.preventDefault();
 
+    if (this.customMouseMoveEvent && this.customMouseMoveEvent(this, me)) {
+        return;
+    }
+
     if (this.showingContextMenu) {
         me.handled = true;
         return;
@@ -2243,6 +2263,10 @@ papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
 
 
 papaya.viewer.Viewer.prototype.mouseDoubleClickEvent = function () {
+    if (this.customMouseDoubleClickEvent && this.customMouseDoubleClickEvent(this)) {
+        return;
+    }
+
     if (this.isAltKeyDown) {
         this.zoomFactorPrevious = 1;
         this.setZoomFactor(1);
@@ -2252,6 +2276,10 @@ papaya.viewer.Viewer.prototype.mouseDoubleClickEvent = function () {
 
 
 papaya.viewer.Viewer.prototype.mouseOutEvent = function (me) {
+    if (this.customMouseOutEvent && this.customMouseOutEvent(this, me)) {
+        return;
+    }
+
     papaya.Container.papayaLastHoveredViewer = null;
 
     if (this.isDragging) {
@@ -2268,7 +2296,11 @@ papaya.viewer.Viewer.prototype.mouseOutEvent = function (me) {
 
 
 
-papaya.viewer.Viewer.prototype.mouseLeaveEvent = function () {};
+papaya.viewer.Viewer.prototype.mouseLeaveEvent = function () {
+    if (this.customMouseLeaveEvent && this.customMouseLeaveEvent(this)) {
+        return;
+    }
+};
 
 
 papaya.viewer.Viewer.prototype.touchMoveEvent = function (me) {
@@ -2828,6 +2860,38 @@ papaya.viewer.Viewer.prototype.processParams = function (params) {
         if (params.showSurfaceCrosshairs !== undefined) {
             this.container.preferences.showSurfaceCrosshairs = (params.showSurfaceCrosshairs ? "Yes" : "No");
         }
+    }
+
+    if (params.customMouseMoveEvent) {
+        this.customMouseMoveEvent = params.customMouseMoveEvent;
+    }
+
+    if (params.customMouseDownEvent) {
+        this.customMouseDownEvent = params.customMouseDownEvent;
+    }
+
+    if (params.customMouseOutEvent) {
+        this.customMouseOutEvent = params.customMouseOutEvent;
+    }
+
+    if (params.customMouseLeaveEvent) {
+        this.customMouseLeaveEvent = params.customMouseLeaveEvent;
+    }
+
+    if (params.customMouseUpEvent) {
+        this.customMouseUpEvent = params.customMouseUpEvent;
+    }
+
+    if (params.customMouseDoubleClickEvent) {
+        this.customMouseDoubleClickEvent = params.customMouseDoubleClickEvent;
+    }
+
+    if (params.customSliceRepaintCallback) {
+        this.container.preferences.customSliceRepaintCallback = params.customSliceRepaintCallback;
+    }
+
+    if (params.customSliceUpdateCallback) {
+        this.container.preferences.customSliceUpdateCallback = params.customSliceUpdateCallback;
     }
 };
 

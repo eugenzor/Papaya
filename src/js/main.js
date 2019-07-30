@@ -47,6 +47,7 @@ papaya.Container = papaya.Container || function (containerHtml) {
     this.orthogonalTall = false;
     this.orthogonalDynamic = false;
     this.kioskMode = false;
+    this.scaleToFit = false;
     this.noNewFiles = false;
     this.showControls = true;
     this.showControlBar = false;
@@ -691,7 +692,7 @@ papaya.Container.prototype.getViewerDimensions = function () {
     ratio = (this.orthogonal ? (this.hasSurface() ? 1.333 : 1.5) : 1);
 
     if (this.orthogonalTall || !this.orthogonal) {
-        height = (this.collapsable ? window.innerHeight : this.containerHtml.parent().height()) - (papaya.viewer.Display.SIZE + (this.kioskMode ? 0 : (papaya.ui.Toolbar.SIZE +
+        height = ((this.collapsable || this.scaleToFit) ? window.innerHeight : this.containerHtml.parent().height()) - (papaya.viewer.Display.SIZE + (this.kioskMode ? 0 : (papaya.ui.Toolbar.SIZE +
             PAPAYA_SPACING)) + PAPAYA_SPACING + (this.fullScreenPadding && !this.nestedViewer ? (2 * PAPAYA_CONTAINER_PADDING_TOP) : 0)) -
             (this.showControlBar ? 2*papaya.ui.Toolbar.SIZE : 0);
 
@@ -702,11 +703,11 @@ papaya.Container.prototype.getViewerDimensions = function () {
         height = papayaRoundFast(width / ratio);
     }
 
-    if (!this.nestedViewer || this.collapsable) {
+    if (!this.nestedViewer || this.collapsable || this.scaleToFit) {
 
         if (this.orthogonalTall) {
 
-            maxWidth = window.innerWidth - (this.fullScreenPadding ? (2 * PAPAYA_PADDING) : 0);
+            maxWidth = (this.scaleToFit ? Math.min(window.innerWidth, parentWidth) : window.innerWidth) - (this.fullScreenPadding ? (2 * PAPAYA_PADDING) : 0);
             if (width > maxWidth) {
                 width = maxWidth;
                 height = papayaRoundFast(width * ratio);
@@ -720,7 +721,6 @@ papaya.Container.prototype.getViewerDimensions = function () {
                 height = maxHeight;
                 width = papayaRoundFast(height * ratio);
             }
-
         }
     }
 
@@ -771,6 +771,10 @@ papaya.Container.prototype.readGlobalParams = function() {
 
     if (this.params.orthogonal !== undefined) {  // default is true
         this.orthogonal = this.params.orthogonal;
+    }
+
+    if (this.params.scaleToFit !== undefined) {
+        this.scaleToFit = this.params.scaleToFit;
     }
 
     this.surfaceParams.showSurfacePlanes = (this.params.showSurfacePlanes === true);

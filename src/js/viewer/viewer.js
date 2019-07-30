@@ -2821,13 +2821,21 @@ papaya.viewer.Viewer.prototype.processParams = function (params) {
             this.container.preferences.showRuler = (params.showRuler ? "Yes" : "No");
         }
 
-        if (params.showSurfacePlanes !== undefined) {
-            this.container.preferences.showSurfacePlanes = (params.showSurfacePlanes ? "Yes" : "No");
-        }
-
         if (params.showSurfaceCrosshairs !== undefined) {
             this.container.preferences.showSurfaceCrosshairs = (params.showSurfaceCrosshairs ? "Yes" : "No");
         }
+    }
+
+    if (params.showSurfacePlanes !== undefined) {
+        this.container.preferences.showSurfacePlanes = (params.showSurfacePlanes ? "Yes" : "No");
+    }
+
+    if (params.showCrosshairs !== undefined) {
+        this.container.preferences.showCrosshairs = (params.showCrosshairs ? "Yes" : "No");
+    }
+
+    if (params.show3DCrosshairs !== undefined) {
+        this.container.preferences.show3DCrosshairs = (params.show3DCrosshairs ? "Yes" : "No");
     }
 };
 
@@ -3366,6 +3374,12 @@ papaya.viewer.Viewer.prototype.isShowingOrientation = function () {
 
 papaya.viewer.Viewer.prototype.isShowingCrosshairs = function () {
     return (this.container.preferences.showCrosshairs === "Yes");
+};
+
+
+
+papaya.viewer.Viewer.prototype.isShowing3DCrosshairs = function () {
+    return (this.container.preferences.show3DCrosshairs === "Yes");
 };
 
 

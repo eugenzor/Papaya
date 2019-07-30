@@ -152,6 +152,7 @@ papaya.viewer.ScreenSurface = papaya.viewer.ScreenSurface || function (baseVolum
     this.viewer = viewer;
     this.currentCoord = viewer.currentCoord;
     this.zoom = 0;
+    this.surfaceZoomRatio = 1.5;
     this.sliceDirection = papaya.viewer.ScreenSlice.DIRECTION_SURFACE;
     this.dynamicStartX = -1;
     this.dynamicStartY = -1;
@@ -313,7 +314,7 @@ papaya.viewer.ScreenSurface.prototype.initialize = function () {
     this.context.viewportWidth = this.canvas.width;
     this.context.viewportHeight = this.canvas.height;
 
-    this.zoom = this.volume.header.imageDimensions.yDim * this.volume.header.voxelDimensions.ySize * 1.5;
+    this.zoom = this.volume.header.imageDimensions.yDim * this.volume.header.voxelDimensions.ySize * this.surfaceZoomRatio;
     this.initPerspective();
 
     this.shaderProgram = papaya.viewer.ScreenSurface.initShaders(this.context);
@@ -336,6 +337,14 @@ papaya.viewer.ScreenSurface.prototype.initialize = function () {
 
     this.updateBackgroundColor();
 };
+
+
+
+papaya.viewer.ScreenSurface.prototype.resetOrientation = function() {
+    this.mouseRotCurrent = this.clearTransform([]);
+    mat4.multiply(this.centerMat, papaya.viewer.ScreenSurface.DEFAULT_ORIENTATION, this.tempMat);
+    mat4.multiply(this.tempMat, this.centerMatInv, this.mouseRotCurrent);
+}
 
 
 
@@ -681,7 +690,7 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
             gl.uniform1i(this.shaderProgram.activePlaneEdge, 0);
         }
 
-        if (this.viewer.isShowingCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
+        if (this.viewer.isShowingCrosshairs() && this.viewer.isShowing3DCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
             if (this.needsUpdateActivePlanes) {
                 this.needsUpdateActivePlanes = false;
                 this.bindActivePlanes(gl);
@@ -1515,6 +1524,9 @@ papaya.viewer.ScreenSurface.prototype.processParams = function (params) {
         if (params.surfaceBackground !== undefined) {
             this.viewer.container.preferences.surfaceBackgroundColor = params.surfaceBackground;
         }
+    }
+    if (params.surfaceZoomRatio) {
+        this.surfaceZoomRatio = params.surfaceZoomRatio;
     }
 };
 

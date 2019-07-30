@@ -340,6 +340,14 @@ papaya.viewer.ScreenSurface.prototype.initialize = function () {
 
 
 
+papaya.viewer.ScreenSurface.prototype.resetOrientation = function() {
+    this.mouseRotCurrent = this.clearTransform([]);
+    mat4.multiply(this.centerMat, papaya.viewer.ScreenSurface.DEFAULT_ORIENTATION, this.tempMat);
+    mat4.multiply(this.tempMat, this.centerMatInv, this.mouseRotCurrent);
+}
+
+
+
 papaya.viewer.ScreenSurface.prototype.calculateScaleFactor = function () {
     var xRange = (this.xSize * this.xDim),
         yRange = (this.ySize * this.yDim),
@@ -682,7 +690,7 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
             gl.uniform1i(this.shaderProgram.activePlaneEdge, 0);
         }
 
-        if (this.viewer.isShowingCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
+        if (this.viewer.isShowingCrosshairs() && this.viewer.isShowing3DCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
             if (this.needsUpdateActivePlanes) {
                 this.needsUpdateActivePlanes = false;
                 this.bindActivePlanes(gl);

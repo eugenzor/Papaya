@@ -2821,13 +2821,13 @@ papaya.viewer.Viewer.prototype.processParams = function (params) {
             this.container.preferences.showRuler = (params.showRuler ? "Yes" : "No");
         }
 
-        if (params.showSurfacePlanes !== undefined) {
-            this.container.preferences.showSurfacePlanes = (params.showSurfacePlanes ? "Yes" : "No");
-        }
-
         if (params.showSurfaceCrosshairs !== undefined) {
             this.container.preferences.showSurfaceCrosshairs = (params.showSurfaceCrosshairs ? "Yes" : "No");
         }
+    }
+
+    if (params.showSurfacePlanes !== undefined) {
+        this.container.preferences.showSurfacePlanes = (params.showSurfacePlanes ? "Yes" : "No");
     }
 };
 

@@ -310,7 +310,7 @@ papaya.viewer.ScreenSurface.prototype.initialize = function () {
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.screenDim;
     this.canvas.height = this.screenDim;
-    this.context = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
+    this.context = this.canvas.getContext("webgl", { alpha: false }) || this.canvas.getContext("experimental-webgl", { alpha: false });
     this.context.viewportWidth = this.canvas.width;
     this.context.viewportHeight = this.canvas.height;
 
@@ -1496,7 +1496,9 @@ papaya.viewer.ScreenSurface.prototype.updatePreferences = function () {
 papaya.viewer.ScreenSurface.prototype.updateBackgroundColor = function () {
     var colorName = this.viewer.container.preferences.surfaceBackgroundColor;
 
-    if (colorName === "Black") {
+    if (Array.isArray(colorName) && colorName.length == 3) {
+        this.backgroundColor = colorName;
+    } else if (colorName === "Black") {
         this.backgroundColor = [0, 0, 0];
     } else if (colorName === "Dark Gray") {
         this.backgroundColor = [0.25, 0.25, 0.25];

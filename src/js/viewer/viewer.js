@@ -78,6 +78,7 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.loadingDTI = false;
     this.loadingDTIModRef = null;
     this.tempCoor = new papaya.core.Coordinate();
+    this.putMainImageOnTheRight = false;
 
     this.listenerContextMenu = function (me) { me.preventDefault(); return false; };
     this.listenerMouseMove = papaya.utilities.ObjectUtils.bind(this, this.mouseMoveEvent);
@@ -1595,42 +1596,80 @@ papaya.viewer.Viewer.prototype.calculateScreenSliceTransforms = function () {
     } else {
         this.viewerDim = this.canvas.height;
 
-        if (this.container.hasSurface()) {
-            this.getTransformParameters(this.mainImage, this.viewerDim, false, 3);
-            this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX = 0;
-            this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
+        if (this.putMainImageOnTheRight) {
+            if (this.container.hasSurface()) {
+                this.getTransformParameters(this.mainImage, this.viewerDim, false, 3);
+                this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX =
+                    (this.viewerDim / 3 + (papaya.viewer.Viewer.GAP));
+                this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
 
-            this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 3);
-            this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX =
-                (this.viewerDim + (papaya.viewer.Viewer.GAP));
-            this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
+                this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 3);
+                this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX = 0;
+                this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
 
-            this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 3);
-            this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX =
-                (this.viewerDim + (papaya.viewer.Viewer.GAP));
-            this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
-                (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) + (papaya.viewer.Viewer.GAP));
+                this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 3);
+                this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX = 0;
+                this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) + (papaya.viewer.Viewer.GAP));
 
-            this.getTransformParameters(this.lowerImageBot2, this.viewerDim, true, 3);
-            this.lowerImageBot2.screenTransform[0][2] += this.lowerImageBot2.screenOffsetX =
-                (this.viewerDim + (papaya.viewer.Viewer.GAP));
-            this.lowerImageBot2.screenTransform[1][2] += this.lowerImageBot2.screenOffsetY =
-                (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) * 2 + (papaya.viewer.Viewer.GAP) * 2);
+                this.getTransformParameters(this.lowerImageBot2, this.viewerDim, true, 3);
+                this.lowerImageBot2.screenTransform[0][2] += this.lowerImageBot2.screenOffsetX = 0;
+                this.lowerImageBot2.screenTransform[1][2] += this.lowerImageBot2.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) * 2 + (papaya.viewer.Viewer.GAP) * 2);
+            } else {
+                this.getTransformParameters(this.mainImage, this.viewerDim, false, 2);
+                this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX =
+                    (this.viewerDim / 2 + (papaya.viewer.Viewer.GAP));
+                this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
+
+                this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 2);
+                this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX = 0;
+                this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 2) + (papaya.viewer.Viewer.GAP));
+
+                this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 2);
+                this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX = 0;
+                this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
+            }
+
         } else {
-            this.getTransformParameters(this.mainImage, this.viewerDim, false, 2);
-            this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX = 0;
-            this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
+            if (this.container.hasSurface()) {
+                this.getTransformParameters(this.mainImage, this.viewerDim, false, 3);
+                this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX = 0;
+                this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
 
-            this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 2);
-            this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX =
-                (this.viewerDim + (papaya.viewer.Viewer.GAP));
-            this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
-                (((this.viewerDim - papaya.viewer.Viewer.GAP) / 2) + (papaya.viewer.Viewer.GAP));
+                this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 3);
+                this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX =
+                    (this.viewerDim + (papaya.viewer.Viewer.GAP));
+                this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
 
-            this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 2);
-            this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX =
-                (this.viewerDim + (papaya.viewer.Viewer.GAP));
-            this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
+                this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 3);
+                this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX =
+                    (this.viewerDim + (papaya.viewer.Viewer.GAP));
+                this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) + (papaya.viewer.Viewer.GAP));
+
+                this.getTransformParameters(this.lowerImageBot2, this.viewerDim, true, 3);
+                this.lowerImageBot2.screenTransform[0][2] += this.lowerImageBot2.screenOffsetX =
+                    (this.viewerDim + (papaya.viewer.Viewer.GAP));
+                this.lowerImageBot2.screenTransform[1][2] += this.lowerImageBot2.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 3) * 2 + (papaya.viewer.Viewer.GAP) * 2);
+            } else {
+                this.getTransformParameters(this.mainImage, this.viewerDim, false, 2);
+                this.mainImage.screenTransform[0][2] += this.mainImage.screenOffsetX = 0;
+                this.mainImage.screenTransform[1][2] += this.mainImage.screenOffsetY = 0;
+
+                this.getTransformParameters(this.lowerImageBot, this.viewerDim, true, 2);
+                this.lowerImageBot.screenTransform[0][2] += this.lowerImageBot.screenOffsetX =
+                    (this.viewerDim + (papaya.viewer.Viewer.GAP));
+                this.lowerImageBot.screenTransform[1][2] += this.lowerImageBot.screenOffsetY =
+                    (((this.viewerDim - papaya.viewer.Viewer.GAP) / 2) + (papaya.viewer.Viewer.GAP));
+
+                this.getTransformParameters(this.lowerImageTop, this.viewerDim, true, 2);
+                this.lowerImageTop.screenTransform[0][2] += this.lowerImageTop.screenOffsetX =
+                    (this.viewerDim + (papaya.viewer.Viewer.GAP));
+                this.lowerImageTop.screenTransform[1][2] += this.lowerImageTop.screenOffsetY = 0;
+            }
         }
     }
 
@@ -2836,6 +2875,10 @@ papaya.viewer.Viewer.prototype.processParams = function (params) {
 
     if (params.show3DCrosshairs !== undefined) {
         this.container.preferences.show3DCrosshairs = (params.show3DCrosshairs ? "Yes" : "No");
+    }
+
+    if (params.putMainImageOnTheRight !== undefined) {
+      this.putMainImageOnTheRight = params.putMainImageOnTheRight;
     }
 };
 

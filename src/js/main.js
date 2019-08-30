@@ -514,7 +514,9 @@ papaya.Container.buildAllContainers = function () {
 
 papaya.Container.startPapaya = function () {
     setTimeout(function () {  // setTimeout necessary in Chrome
-        window.scrollTo(0, 0);
+        if (!papaya.Container.disableAutoScroll) {
+            window.scrollTo(0, 0);
+        }
     }, 0);
 
     papaya.Container.DICOM_SUPPORT = (typeof(daikon) !== "undefined");
@@ -540,7 +542,9 @@ papaya.Container.resizePapaya = function (ev, force) {
     }
 
     setTimeout(function () {  // setTimeout necessary in Chrome
-        window.scrollTo(0, 0);
+        if (!papaya.Container.disableAutoScroll) {
+            window.scrollTo(0, 0);
+        }
     }, 0);
 };
 
@@ -1398,7 +1402,9 @@ papaya.Container.prototype.expandViewer = function () {
     if (this.nestedViewer) {
         this.nestedViewer = false;
         this.collapsable = true;
-        this.tempScrollTop = $(window).scrollTop();
+        if (!papaya.Container.disableAutoScroll) {
+            this.tempScrollTop = $(window).scrollTop();
+        }
 
         $(":hidden").addClass(PAPAYA_CONTAINER_COLLAPSABLE_EXEMPT);
         $(document.body).children().hide();
@@ -1427,7 +1433,9 @@ papaya.Container.prototype.expandViewer = function () {
         this.updateViewerSize();
 
         setTimeout(function () {
-            window.scrollTo(0, 0);
+            if (!papaya.Container.disableAutoScroll) {
+                window.scrollTo(0, 0);
+            }
             container.viewer.addScroll();
         }, 0);
     }
@@ -1467,7 +1475,9 @@ papaya.Container.prototype.collapseViewer = function () {
         }
 
         setTimeout(function () {
-            $(window).scrollTop(container.tempScrollTop);
+            if (!papaya.Container.disableAutoScroll) {
+                $(window).scrollTop(container.tempScrollTop);
+            }
             container.viewer.removeScroll();
         }, 0);
     }

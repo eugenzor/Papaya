@@ -21,7 +21,7 @@ var shaderVert = [
 
     "uniform mat4 uMVMatrix;",
     "uniform mat4 uPMatrix;",
-    "uniform mat3 uNMatrix;",
+    "uniform mat4 uNMatrix;",
 
     "uniform vec3 uAmbientColor;",
     "uniform vec3 uPointLightingLocation;",
@@ -47,9 +47,15 @@ var shaderVert = [
     "    vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);",
     "    gl_Position = uPMatrix * mvPosition;",
     "    if (!uActivePlane && !uActivePlaneEdge && !uCrosshairs && !uOrientationText && !uRuler) {",
-    "       vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);",
-    "       vec3 transformedNormal = uNMatrix * aVertexNormal;",
-    "       float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);",
+    "       //vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);",
+    "       vec3 lightDirection;",
+    "       if (uPointLightingLocation.z > 0.0) {",
+    "           lightDirection = vec3(0.0, 0.0, 1.0);",
+    "       } else {",
+    "           lightDirection = vec3(0.0, 0.0, -1.0);",
+    "       }",
+    "       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);",
+    "       float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);",
     "       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;",
     "       if (uColors) {",
     "           vColor = aVertexColor;",
@@ -384,10 +390,10 @@ papaya.viewer.ScreenSurface.prototype.resize = function (screenDim) {
 papaya.viewer.ScreenSurface.prototype.applyMatrixUniforms = function(gl) {
     gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.pMatrix);
     gl.uniformMatrix4fv(this.shaderProgram.mvMatrixUniform, false, this.mvMatrix);
-    var normalMatrix = mat3.create();
-    mat4.toInverseMat3(this.mvMatrix, normalMatrix);
-    mat3.transpose(normalMatrix);
-    gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
+    var normalMatrix = mat4.create();
+    mat4.inverse(this.mvMatrix, normalMatrix);
+    mat4.transpose(normalMatrix);
+    gl.uniformMatrix4fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
 };
 
 

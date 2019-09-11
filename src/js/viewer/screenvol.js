@@ -43,6 +43,8 @@ papaya.viewer.ScreenVolume = papaya.viewer.ScreenVolume || function (vol, params
     this.seriesLabels = this.volume.getSeriesLabels();
     this.staticIcon = null;
 
+    this.screenFilterValues = null;
+
     var screenParams = params[this.volume.fileName];
     if (screenParams) {
         if (screenParams.icon) {
@@ -82,6 +84,10 @@ papaya.viewer.ScreenVolume = papaya.viewer.ScreenVolume || function (vol, params
             }
         } else {
             this.findDisplayRange(parametric, screenParams);
+        }
+
+        if (screenParams.filterValues !== undefined) {
+          this.screenFilterValues = screenParams.filterValues;
         }
 
         if (parametric) {
@@ -216,6 +222,11 @@ papaya.viewer.ScreenVolume.prototype.setScreenRangeNegatives = function (min, ma
 papaya.viewer.ScreenVolume.prototype.updateScreenRange = function () {
     this.screenRatio = (papaya.viewer.ScreenSlice.SCREEN_PIXEL_MAX / (this.screenMax - this.screenMin));
     this.negative = (this.screenMax < this.screenMin);
+};
+
+
+papaya.viewer.ScreenVolume.prototype.setScreenFilterValues = function (values) {
+    this.screenFilterValues = values;
 };
 
 

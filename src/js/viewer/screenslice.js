@@ -309,7 +309,12 @@ papaya.viewer.ScreenSlice.prototype.updateSlice = function (slice, force) {
                         originalVal = value;
                         this.imageData[ctr][index] = value;
 
-                        if ((!this.screenVolumes[ctr].negative && (value <= this.screenVolumes[ctr].screenMin)) ||
+                        if (this.screenVolumes[ctr].screenFilterValues &&
+                            this.screenVolumes[ctr].screenFilterValues.length > 0 &&
+                            this.screenVolumes[ctr].screenFilterValues.indexOf(value) == -1) {
+                            value = papaya.viewer.ScreenSlice.SCREEN_PIXEL_MIN;  // screen value
+                            thresholdAlpha = this.screenVolumes[ctr].isOverlay() ? 0 : 255;
+                        } else if ((!this.screenVolumes[ctr].negative && (value <= this.screenVolumes[ctr].screenMin)) ||
                             (this.screenVolumes[ctr].negative && (value >= this.screenVolumes[ctr].screenMin)) ||
                             isNaN(value)) {
                             value = papaya.viewer.ScreenSlice.SCREEN_PIXEL_MIN;  // screen value
@@ -488,7 +493,12 @@ papaya.viewer.ScreenSlice.prototype.repaint = function (slice, force, worldSpace
                         value = this.imageData[ctr][index];
                         originalVal = value;
 
-                        if ((!this.screenVolumes[ctr].negative && (value <= this.screenVolumes[ctr].screenMin)) ||
+                        if (this.screenVolumes[ctr].screenFilterValues &&
+                            this.screenVolumes[ctr].screenFilterValues.length > 0 &&
+                            this.screenVolumes[ctr].screenFilterValues.indexOf(value) == -1) {
+                            value = papaya.viewer.ScreenSlice.SCREEN_PIXEL_MIN;  // screen value
+                            thresholdAlpha = this.screenVolumes[ctr].isOverlay() ? 0 : 255;
+                        } else if ((!this.screenVolumes[ctr].negative && (value <= this.screenVolumes[ctr].screenMin)) ||
                             (this.screenVolumes[ctr].negative && (value >= this.screenVolumes[ctr].screenMin)) ||
                             isNaN(value)) {
                             value = papaya.viewer.ScreenSlice.SCREEN_PIXEL_MIN;  // screen value

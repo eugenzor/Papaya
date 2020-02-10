@@ -28,6 +28,7 @@ papaya.surface.Surface = papaya.surface.Surface || function (progressMeter, para
     this.colorsBuffer = null;
     this.solidColor = null;
     this.filterColor = null;
+    this.mappedColor = null;
     this.surfaceType = papaya.surface.Surface.SURFACE_TYPE_UNKNOWN;
     this.fileFormat = null;
     this.params = params;

@@ -37,6 +37,8 @@ var shaderVert = [
     "uniform vec4 uSolidColor;",
     "uniform bool uColorFilter;",
     "uniform vec4 uFilterColor;",
+    "uniform bool uColorMapped;",
+    "uniform vec4 uMappedColor;",
     "uniform bool uOrientationText;",
     "uniform bool uRuler;",
     "uniform float uAlpha;",
@@ -62,8 +64,14 @@ var shaderVert = [
     "       float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);",
     "       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;",
     "       if (uColors) {",
-    "           if (!uColorFilter || distance(aVertexColor, uFilterColor) < 0.00001) {",
+    "           if (!uColorFilter) {",
     "               vColor = aVertexColor;",
+    "           } else if (distance(aVertexColor, uFilterColor) < 0.00001) {",
+    "               if (!uColorMapped) {",
+    "                   vColor = aVertexColor;",
+    "               } else {",
+    "                   vColor = uMappedColor;",
+    "               }",
     "           } else {",
     "               vAlpha = 0.15;",
     "               vColor = vec4(1., 1., 1., 0.15);",
@@ -94,6 +102,8 @@ var shaderFrag = [
     "uniform vec4 uSolidColor;",
     "uniform bool uColorFilter;",
     "uniform vec4 uFilterColor;",
+    "uniform bool uColorMapped;",
+    "uniform vec4 uMappedColor;",
     "uniform bool uOrientationText;",
     "uniform bool uRuler;",
     "uniform sampler2D uSampler;",
@@ -310,6 +320,8 @@ papaya.viewer.ScreenSurface.initShaders = function (gl) {
     shaderProgram.solidColor = gl.getUniformLocation(shaderProgram, "uSolidColor");
     shaderProgram.hasFilterColor = gl.getUniformLocation(shaderProgram, "uColorFilter");
     shaderProgram.filterColor = gl.getUniformLocation(shaderProgram, "uFilterColor");
+    shaderProgram.hasMappedColor = gl.getUniformLocation(shaderProgram, "uColorMapped");
+    shaderProgram.mappedColor = gl.getUniformLocation(shaderProgram, "uMappedColor");
     shaderProgram.orientationText = gl.getUniformLocation(shaderProgram, "uOrientationText");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     shaderProgram.ruler = gl.getUniformLocation(shaderProgram, "uRuler");
@@ -687,6 +699,7 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
     gl.uniform1i(this.shaderProgram.hasSolidColor, 0);
     gl.uniform1i(this.shaderProgram.hasColors, 0);
     gl.uniform1i(this.shaderProgram.hasFilterColor, 0);
+    gl.uniform1i(this.shaderProgram.hasMappedColor, 0);
 
     // do picking if necessary
     if (this.needsPick) {
@@ -832,6 +845,7 @@ papaya.viewer.ScreenSurface.prototype.renderSurface = function (gl, index, isTra
     gl.uniform1i(this.shaderProgram.hasSolidColor, 0);
     gl.uniform1i(this.shaderProgram.hasColors, 0);
     gl.uniform1i(this.shaderProgram.hasFilterColor, 0);
+    gl.uniform1i(this.shaderProgram.hasMappedColor, 0);
 
     if (this.surfaces[index].solidColor) {
         gl.uniform1i(this.shaderProgram.hasSolidColor, 1);
@@ -843,6 +857,12 @@ papaya.viewer.ScreenSurface.prototype.renderSurface = function (gl, index, isTra
         gl.uniform1i(this.shaderProgram.hasFilterColor, 1);
         gl.uniform4f(this.shaderProgram.filterColor, this.surfaces[index].filterColor[0],
             this.surfaces[index].filterColor[1], this.surfaces[index].filterColor[2], 1.0);
+    }
+
+    if (this.surfaces[index].mappedColor) {
+        gl.uniform1i(this.shaderProgram.hasMappedColor, 1);
+        gl.uniform4f(this.shaderProgram.mappedColor, this.surfaces[index].mappedColor[0],
+            this.surfaces[index].mappedColor[1], this.surfaces[index].mappedColor[2], 1.0);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.surfaces[index].pointsBuffer);

@@ -357,6 +357,10 @@ papaya.viewer.ScreenSlice.prototype.updateSlice = function (slice, force) {
 
         if (usedRaster) {
             this.contextMain.putImageData(this.imageDataDraw, 0, 0);
+            if (this.manager.container.preferences.customSliceUpdateCallback) {
+                this.manager.container.preferences.customSliceUpdateCallback(
+                    this.contextMain, this.imageDataDraw, slice, this.sliceDirection, force, worldSpace);
+            }
         }
     }
 };
@@ -540,6 +544,10 @@ papaya.viewer.ScreenSlice.prototype.repaint = function (slice, force, worldSpace
         }
 
         this.contextMain.putImageData(this.imageDataDraw, 0, 0);
+        if (this.manager.container.preferences.customSliceRepaintCallback) {
+            this.manager.container.preferences.customSliceRepaintCallback(
+                this.contextMain, this.imageDataDraw, slice, this.sliceDirection, force, worldSpace);
+        }
     } else {
         this.updateSlice(slice, true);
     }

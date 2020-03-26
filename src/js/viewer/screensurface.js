@@ -21,7 +21,7 @@ var shaderVert = [
 
     "uniform mat4 uMVMatrix;",
     "uniform mat4 uPMatrix;",
-    "uniform mat3 uNMatrix;",
+    "uniform mat4 uNMatrix;",
 
     "uniform vec3 uAmbientColor;",
     "uniform vec3 uPointLightingLocation;",
@@ -35,6 +35,10 @@ var shaderVert = [
     "uniform bool uTrianglePicking;",
     "uniform bool uColorSolid;",
     "uniform vec4 uSolidColor;",
+    "uniform bool uColorFilter;",
+    "uniform vec4 uFilterColor;",
+    "uniform bool uColorMapped;",
+    "uniform vec4 uMappedColor;",
     "uniform bool uOrientationText;",
     "uniform bool uRuler;",
     "uniform float uAlpha;",
@@ -42,17 +46,36 @@ var shaderVert = [
     "varying vec3 vLightWeighting;",
     "varying lowp vec4 vColor;",
     "varying vec2 vTextureCoord;",
+    "varying float vAlpha;",
 
     "void main(void) {",
     "    vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);",
     "    gl_Position = uPMatrix * mvPosition;",
+    "    vAlpha = uAlpha;",
     "    if (!uActivePlane && !uActivePlaneEdge && !uCrosshairs && !uOrientationText && !uRuler) {",
-    "       vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);",
-    "       vec3 transformedNormal = uNMatrix * aVertexNormal;",
-    "       float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);",
+    "       //vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);",
+    "       vec3 lightDirection;",
+    "       if (uPointLightingLocation.z > 0.0) {",
+    "           lightDirection = vec3(0.0, 0.0, 1.0);",
+    "       } else {",
+    "           lightDirection = vec3(0.0, 0.0, -1.0);",
+    "       }",
+    "       vec4 transformedNormal = uNMatrix * vec4(aVertexNormal, 1.0);",
+    "       float directionalLightWeighting = max(dot(transformedNormal.xyz, lightDirection), 0.0);",
     "       vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;",
     "       if (uColors) {",
-    "           vColor = aVertexColor;",
+    "           if (!uColorFilter) {",
+    "               vColor = aVertexColor;",
+    "           } else if (distance(aVertexColor, uFilterColor) < 0.00001) {",
+    "               if (!uColorMapped) {",
+    "                   vColor = aVertexColor;",
+    "               } else {",
+    "                   vColor = uMappedColor;",
+    "               }",
+    "           } else {",
+    "               vAlpha = 0.15;",
+    "               vColor = vec4(1., 1., 1., 0.15);",
+    "           }",
     "       }",
     "   }",
 
@@ -77,6 +100,10 @@ var shaderFrag = [
     "uniform bool uTrianglePicking;",
     "uniform bool uColorSolid;",
     "uniform vec4 uSolidColor;",
+    "uniform bool uColorFilter;",
+    "uniform vec4 uFilterColor;",
+    "uniform bool uColorMapped;",
+    "uniform vec4 uMappedColor;",
     "uniform bool uOrientationText;",
     "uniform bool uRuler;",
     "uniform sampler2D uSampler;",
@@ -85,6 +112,7 @@ var shaderFrag = [
     "varying vec3 vLightWeighting;",
     "varying lowp vec4 vColor;",
     "varying vec2 vTextureCoord;",
+    "varying float vAlpha;",
 
     "vec4 packFloatToVec4i(const float value) {",
     "   const vec4 bitSh = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);",
@@ -123,7 +151,7 @@ var shaderFrag = [
     "    } else if (uTrianglePicking) {",
     "       gl_FragColor = packFloatToVec4i(gl_FragCoord.z);",
     "    } else {",
-    "       gl_FragColor = vec4(fragmentColor.rgb * vLightWeighting, uAlpha);",
+    "       gl_FragColor = vec4(fragmentColor.rgb * vLightWeighting, vAlpha);",
     "    }",
     "}"
 ].join("\n");
@@ -290,6 +318,10 @@ papaya.viewer.ScreenSurface.initShaders = function (gl) {
     shaderProgram.hasColors = gl.getUniformLocation(shaderProgram, "uColors");
     shaderProgram.hasSolidColor = gl.getUniformLocation(shaderProgram, "uColorSolid");
     shaderProgram.solidColor = gl.getUniformLocation(shaderProgram, "uSolidColor");
+    shaderProgram.hasFilterColor = gl.getUniformLocation(shaderProgram, "uColorFilter");
+    shaderProgram.filterColor = gl.getUniformLocation(shaderProgram, "uFilterColor");
+    shaderProgram.hasMappedColor = gl.getUniformLocation(shaderProgram, "uColorMapped");
+    shaderProgram.mappedColor = gl.getUniformLocation(shaderProgram, "uMappedColor");
     shaderProgram.orientationText = gl.getUniformLocation(shaderProgram, "uOrientationText");
     shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     shaderProgram.ruler = gl.getUniformLocation(shaderProgram, "uRuler");
@@ -384,10 +416,10 @@ papaya.viewer.ScreenSurface.prototype.resize = function (screenDim) {
 papaya.viewer.ScreenSurface.prototype.applyMatrixUniforms = function(gl) {
     gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.pMatrix);
     gl.uniformMatrix4fv(this.shaderProgram.mvMatrixUniform, false, this.mvMatrix);
-    var normalMatrix = mat3.create();
-    mat4.toInverseMat3(this.mvMatrix, normalMatrix);
-    mat3.transpose(normalMatrix);
-    gl.uniformMatrix3fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
+    var normalMatrix = mat4.create();
+    mat4.inverse(this.mvMatrix, normalMatrix);
+    mat4.transpose(normalMatrix);
+    gl.uniformMatrix4fv(this.shaderProgram.nMatrixUniform, false, normalMatrix);
 };
 
 
@@ -580,7 +612,7 @@ papaya.viewer.ScreenSurface.prototype.hasTranslucentSurfaces = function () {
 
 
 papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
-    var ctr, xSlice, ySlice, zSlice, hasTranslucent = this.hasTranslucentSurfaces();
+    var ctr, xSlice, ySlice, zSlice, hasTranslucent = this.hasTranslucentSurfaces(), isTranslucent;
 
     // initialize
     gl.clearColor(this.backgroundColor[0], this.backgroundColor[1], this.backgroundColor[2], 1.0);
@@ -619,19 +651,55 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
         if ((this.pickingBuffer === null) || (this.pickingBuffer.length !== (gl.viewportWidth * gl.viewportHeight * 4))) {
             this.pickingBuffer = new Uint8Array(gl.viewportWidth * gl.viewportHeight * 4);
         }
+    } else {
+        if (this.viewer.isShowingCrosshairs() && this.viewer.isShowing3DCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
+            if (this.needsUpdateActivePlanes) {
+                this.needsUpdateActivePlanes = false;
+                this.bindActivePlanes(gl);
+            }
+
+            gl.enable(gl.DEPTH_TEST);
+
+            // draw crosshairs
+            gl.uniform1i(this.shaderProgram.crosshairs, 1);
+            gl.lineWidth(this.isMainView() ? 3.0 : 2.0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineXBuffer);
+            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineXBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, 2);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineYBuffer);
+            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineYBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, 2);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineZBuffer);
+            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineZBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, 2);
+
+            gl.uniform1i(this.shaderProgram.crosshairs, 0);
+        }
     }
 
     // draw surfaces (first pass)
     gl.enable(gl.DEPTH_TEST);
 
     for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
-        if (!this.surfaces[ctr].hidden) {
-          this.renderSurface(gl, ctr, this.surfaces[ctr].alpha < 1, true, false);
+        isTranslucent = this.surfaces[ctr].alpha < 1;
+        if (!this.surfaces[ctr].hidden && !isTranslucent) {
+          this.renderSurface(gl, ctr, isTranslucent, true, false);
+        }
+    }
+    for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
+        isTranslucent = this.surfaces[ctr].alpha < 1;
+        if (!this.surfaces[ctr].hidden && isTranslucent) {
+          this.renderSurface(gl, ctr, isTranslucent, true, false);
         }
     }
 
     gl.uniform1i(this.shaderProgram.hasSolidColor, 0);
     gl.uniform1i(this.shaderProgram.hasColors, 0);
+    gl.uniform1i(this.shaderProgram.hasFilterColor, 0);
+    gl.uniform1i(this.shaderProgram.hasMappedColor, 0);
 
     // do picking if necessary
     if (this.needsPick) {
@@ -690,37 +758,19 @@ papaya.viewer.ScreenSurface.prototype.drawScene = function (gl) {
             gl.uniform1i(this.shaderProgram.activePlaneEdge, 0);
         }
 
-        if (this.viewer.isShowingCrosshairs() && this.viewer.isShowing3DCrosshairs() && ((this.viewer.mainImage !== this) || this.viewer.toggleMainCrosshairs)) {
-            if (this.needsUpdateActivePlanes) {
-                this.needsUpdateActivePlanes = false;
-                this.bindActivePlanes(gl);
-            }
-
-            // draw crosshairs
-            gl.uniform1i(this.shaderProgram.crosshairs, 1);
-            gl.lineWidth(this.isMainView() ? 3.0 : 2.0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineXBuffer);
-            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineXBuffer.itemSize, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, 2);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineYBuffer);
-            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineYBuffer.itemSize, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, 2);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.crosshairLineZBuffer);
-            gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.crosshairLineZBuffer.itemSize, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, 2);
-
-            gl.uniform1i(this.shaderProgram.crosshairs, 0);
-        }
-
         // draw surface (secondpass)
         gl.enable(gl.DEPTH_TEST);
 
         for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
-            if (!this.surfaces[ctr].hidden && hasTranslucent) {
-                this.renderSurface(gl, ctr, this.surfaces[ctr].alpha < 1, false, true);
+            isTranslucent = this.surfaces[ctr].alpha < 1;
+            if (!this.surfaces[ctr].hidden && hasTranslucent && !isTranslucent) {
+                this.renderSurface(gl, ctr, isTranslucent, false, true);
+            }
+        }
+        for (ctr = 0; ctr < this.surfaces.length; ctr += 1) {
+            isTranslucent = this.surfaces[ctr].alpha < 1;
+            if (!this.surfaces[ctr].hidden && hasTranslucent && isTranslucent) {
+                this.renderSurface(gl, ctr, isTranslucent, false, true);
             }
         }
 
@@ -794,11 +844,25 @@ papaya.viewer.ScreenSurface.prototype.renderSurface = function (gl, index, isTra
 
     gl.uniform1i(this.shaderProgram.hasSolidColor, 0);
     gl.uniform1i(this.shaderProgram.hasColors, 0);
+    gl.uniform1i(this.shaderProgram.hasFilterColor, 0);
+    gl.uniform1i(this.shaderProgram.hasMappedColor, 0);
 
     if (this.surfaces[index].solidColor) {
         gl.uniform1i(this.shaderProgram.hasSolidColor, 1);
         gl.uniform4f(this.shaderProgram.solidColor, this.surfaces[index].solidColor[0],
             this.surfaces[index].solidColor[1], this.surfaces[index].solidColor[2], 1.0);
+    }
+
+    if (this.surfaces[index].filterColor) {
+        gl.uniform1i(this.shaderProgram.hasFilterColor, 1);
+        gl.uniform4f(this.shaderProgram.filterColor, this.surfaces[index].filterColor[0],
+            this.surfaces[index].filterColor[1], this.surfaces[index].filterColor[2], 1.0);
+    }
+
+    if (this.surfaces[index].mappedColor) {
+        gl.uniform1i(this.shaderProgram.hasMappedColor, 1);
+        gl.uniform4f(this.shaderProgram.mappedColor, this.surfaces[index].mappedColor[0],
+            this.surfaces[index].mappedColor[1], this.surfaces[index].mappedColor[2], 1.0);
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.surfaces[index].pointsBuffer);
@@ -876,6 +940,8 @@ papaya.viewer.ScreenSurface.prototype.drawRulerPoint = function (gl, xLoc, yLoc,
     gl.uniform1i(this.shaderProgram.hasSolidColor, 1);
     gl.uniform4f(this.shaderProgram.solidColor, papaya.viewer.ScreenSurface.RULER_COLOR[0],
         papaya.viewer.ScreenSurface.RULER_COLOR[1], papaya.viewer.ScreenSurface.RULER_COLOR[2], 1.0);
+
+    gl.uniform1i(this.shaderProgram.hasFilterColor, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.sphereVertexPositionBuffer);
     gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.sphereVertexPositionBuffer.itemSize,
